@@ -34,6 +34,7 @@ To run the app locally, follow these steps:
 2. Run the following commands:
 
    ```bash
+   cd .\fav-posts\
    npm install
    json-server --watch db.json --port 5000
    npm run dev
