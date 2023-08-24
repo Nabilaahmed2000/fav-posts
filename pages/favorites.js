@@ -3,32 +3,33 @@ import Card from "../components/Card";
 import styles from "../styles/Pages.module.scss";
 import axios from "axios";
 
-const Home = () => {
-  const [posts, setPosts] = useState([]);
+const Favorites = () => {
+  // State for favorite posts and post details
   const [favoritePosts, setFavoritePosts] = useState([]);
+  const [favoritePostDetails, setFavoritePostDetails] = useState([]);
 
+  // Fetch stored favorite posts on component mount
   useEffect(() => {
-    fetchData();
-    loadFavoritePostsFromStorage();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/posts");
-      setPosts(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const loadFavoritePostsFromStorage = () => {
     if (typeof window !== "undefined") {
       const storedFavoritePosts =
         JSON.parse(localStorage.getItem("favoritePosts")) || [];
       setFavoritePosts(storedFavoritePosts);
     }
-  };
+  }, []);
 
+  // Fetch post details on component mount
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/posts")
+      .then((response) => {
+        setFavoritePostDetails(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
+  // Handle favorite toggle
   const handleFavoriteToggle = (postId) => {
     const updatedFavoritePosts = favoritePosts.includes(postId)
       ? favoritePosts.filter((id) => id !== postId)
@@ -38,11 +39,17 @@ const Home = () => {
     localStorage.setItem("favoritePosts", JSON.stringify(updatedFavoritePosts));
   };
 
+  // Filter and display favorite posts
+  const favoritePostIds = new Set(favoritePosts);
+  const favoritePostsToDisplay = favoritePostDetails.filter((post) =>
+    favoritePostIds.has(post.id)
+  );
+
   return (
     <div className={styles.container}>
-      <h1>Posts Listing</h1>
+      <h1>Favorites</h1>
       <div className={styles.cardContainer}>
-        {posts.map((post) => (
+        {favoritePostsToDisplay.map((post) => (
           <Card
             key={post.id}
             post={post}
@@ -55,5 +62,4 @@ const Home = () => {
   );
 };
 
-export default Home;
-
+export default Favorites;
